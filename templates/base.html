@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureBank{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#f0f9ff', 100:'#e0f2fe', 200:'#bae6fd', 300:'#7dd3fc', 400:'#38bdf8', 500:'#0ea5e9', 600:'#0284c7', 700:'#0369a1', 800:'#075985', 900:'#0c4a6e' },
+                        surface: { 800:'#1e293b', 900:'#0f172a', 950:'#020617' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        body { background: #020617; color: #f1f5f9; }
+        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.06); }
+        .glass-light { background: rgba(30, 41, 59, 0.35); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.04); }
+        .sidebar-link { transition: all 0.2s; }
+        .sidebar-link:hover, .sidebar-link.active { background: rgba(14, 165, 233, 0.12); color: #38bdf8; }
+        .sidebar-link.active { border-right: 3px solid #0ea5e9; }
+        .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-overlay { transition: opacity 0.2s; }
+        .modal-content { transition: transform 0.2s; }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased flex">
+
+    <!-- ─── Sidebar ─── -->
+    <aside class="hidden md:flex md:flex-col w-64 min-h-screen glass border-r border-white/5 fixed z-40">
+        <!-- Logo -->
+        <div class="px-6 py-5 border-b border-white/5">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-sm">SB</div>
+                <div>
+                    <div class="font-bold text-white text-sm tracking-tight">SecureBank</div>
+                    <div class="text-[10px] text-slate-500 uppercase tracking-widest">Security System</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            {% if session.get('role') == 'user' %}
+                <div class="px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Main</div>
+                <a href="{{ url_for('dashboard') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'dashboard' }}">
+                    <span class="mr-3 text-base">📊</span> Dashboard
+                </a>
+                <a href="{{ url_for('profile') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'profile' }}">
+                    <span class="mr-3 text-base">👤</span> Profile
+                </a>
+                <a href="{{ url_for('user_sessions') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'user_sessions' }}">
+                    <span class="mr-3 text-base">🕐</span> Session History
+                </a>
+            {% elif session.get('role') == 'admin' %}
+                <div class="px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Overview</div>
+                <a href="{{ url_for('admin_overview') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'admin_overview' }}">
+                    <span class="mr-3 text-base">📊</span> Dashboard
+                </a>
+                <a href="{{ url_for('admin_activity') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'admin_activity' }}">
+                    <span class="mr-3 text-base">📡</span> Activity Feed
+                </a>
+
+                <div class="px-3 py-2 mt-4 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Management</div>
+                <a href="{{ url_for('admin_users') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'admin_users' }}">
+                    <span class="mr-3 text-base">👥</span> Users
+                </a>
+                <a href="{{ url_for('admin_sessions') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'admin_sessions' }}">
+                    <span class="mr-3 text-base">🔐</span> Sessions
+                </a>
+                <a href="{{ url_for('admin_transactions') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'admin_transactions' }}">
+                    <span class="mr-3 text-base">💳</span> Transactions
+                </a>
+
+                <div class="px-3 py-2 mt-4 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Security</div>
+                <a href="{{ url_for('admin_events') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'admin_events' }}">
+                    <span class="mr-3 text-base">⚠️</span> Security Events
+                </a>
+                <a href="{{ url_for('admin_request_logs') }}" class="sidebar-link flex items-center px-3 py-2.5 rounded-lg text-sm text-slate-300 {{ 'active' if request.endpoint == 'admin_request_logs' }}">
+                    <span class="mr-3 text-base">📋</span> Request Logs
+                </a>
+            {% endif %}
+        </nav>
+
+        <!-- User Info -->
+        <div class="px-4 py-4 border-t border-white/5">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div class="w-8 h-8 rounded-full bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xs font-bold flex-shrink-0">
+                        {{ (session.get('f_name', session.get('admin_name', '?')))[0] | upper }}
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium text-white truncate">{{ session.get('f_name', session.get('admin_name', 'Guest')) }}</div>
+                        <div class="text-[10px] text-slate-500 uppercase tracking-wider">{{ session.get('role', 'guest') }}</div>
+                    </div>
+                </div>
+                <a href="{{ url_for('logout') }}" class="text-slate-500 hover:text-red-400 transition" title="Logout">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ─── Main Content ─── -->
+    <div class="flex-1 md:ml-64">
+        <!-- Mobile Header -->
+        <header class="md:hidden glass sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
+            <div class="font-bold text-brand-400">SecureBank</div>
+            <div class="flex items-center space-x-3">
+                <span class="text-xs text-slate-400">{{ session.get('f_name', session.get('admin_name', '')) }}</span>
+                <a href="{{ url_for('logout') }}" class="text-xs text-slate-400 hover:text-red-400">Logout</a>
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        <div class="px-6 pt-6">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-4 p-4 rounded-xl text-sm font-medium fade-in
+                            {% if category == 'error' %}bg-red-500/10 text-red-400 border border-red-500/20
+                            {% elif category == 'success' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                            {% else %}bg-brand-500/10 text-brand-400 border border-brand-500/20{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Page Content -->
+        <main class="p-6 fade-in">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="px-6 py-4 text-center text-[11px] text-slate-600 border-t border-white/5">
+            &copy; 2025 SecureBank — Banking Security System. All rights reserved.
+        </footer>
+    </div>
+
+</body>
+</html>
