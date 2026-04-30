@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Activity Feed - SecureBank Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-white">Activity Feed</h1>
+        <p class="text-slate-400 text-sm mt-1">Real-time log of all system activity — transactions, logins, and security events.</p>
+    </div>
+
+    <!-- Timeline -->
+    <div class="space-y-3">
+        {% for activity in activities %}
+        <div class="glass rounded-xl p-4 hover:bg-slate-800/30 transition-colors flex items-start space-x-4">
+            <!-- Icon -->
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-lg
+                {% if activity.color == 'green' %}bg-emerald-500/15 border border-emerald-500/20
+                {% elif activity.color == 'blue' %}bg-blue-500/15 border border-blue-500/20
+                {% elif activity.color == 'red' %}bg-red-500/15 border border-red-500/20
+                {% elif activity.color == 'yellow' %}bg-yellow-500/15 border border-yellow-500/20
+                {% else %}bg-slate-500/15 border border-slate-500/20{% endif %}">
+                {{ activity.icon }}
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="font-medium text-white text-sm">{{ activity.title }}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider
+                            {% if activity.color == 'green' %}bg-emerald-500/10 text-emerald-400
+                            {% elif activity.color == 'blue' %}bg-blue-500/10 text-blue-400
+                            {% elif activity.color == 'red' %}bg-red-500/10 text-red-400
+                            {% elif activity.color == 'yellow' %}bg-yellow-500/10 text-yellow-400
+                            {% else %}bg-slate-500/10 text-slate-400{% endif %}">
+                            {{ activity.type }}
+                        </span>
+                    </div>
+                    <span class="text-[11px] text-slate-500 flex-shrink-0 ml-4">
+                        {{ activity.time.strftime('%b %d, %H:%M') if activity.time else '' }}
+                    </span>
+                </div>
+                <p class="text-sm text-slate-400 mt-1 truncate">{{ activity.detail }}</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="glass rounded-xl p-12 text-center">
+            <div class="text-3xl mb-3">📡</div>
+            <div class="text-slate-400 text-sm">No activity recorded yet.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
