@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Security Events - SecureBank Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-white">Security Events</h1>
+            <p class="text-slate-400 text-sm mt-1">All security events logged in the system.</p>
+        </div>
+    </div>
+
+    <!-- Risk Filter Tabs -->
+    <div class="flex space-x-2">
+        <a href="{{ url_for('admin_events', risk='all') }}"
+           class="px-4 py-2 rounded-lg text-xs font-semibold transition
+                  {% if risk_filter == 'all' %}bg-brand-500/20 text-brand-300 border border-brand-500/30{% else %}glass text-slate-400 hover:text-white{% endif %}">
+            All
+        </a>
+        <a href="{{ url_for('admin_events', risk='High') }}"
+           class="px-4 py-2 rounded-lg text-xs font-semibold transition
+                  {% if risk_filter == 'High' %}bg-red-500/20 text-red-300 border border-red-500/30{% else %}glass text-slate-400 hover:text-white{% endif %}">
+            🔴 High
+        </a>
+        <a href="{{ url_for('admin_events', risk='Medium') }}"
+           class="px-4 py-2 rounded-lg text-xs font-semibold transition
+                  {% if risk_filter == 'Medium' %}bg-yellow-500/20 text-yellow-300 border border-yellow-500/30{% else %}glass text-slate-400 hover:text-white{% endif %}">
+            🟡 Medium
+        </a>
+        <a href="{{ url_for('admin_events', risk='Low') }}"
+           class="px-4 py-2 rounded-lg text-xs font-semibold transition
+                  {% if risk_filter == 'Low' %}bg-slate-500/20 text-slate-300 border border-slate-500/30{% else %}glass text-slate-400 hover:text-white{% endif %}">
+            🟢 Low
+        </a>
+    </div>
+
+    <!-- Events Table -->
+    <div class="glass rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="text-[11px] uppercase text-slate-500 bg-slate-800/40 border-b border-white/5">
+                    <tr>
+                        <th class="px-5 py-3">ID</th>
+                        <th class="px-5 py-3">Event Type</th>
+                        <th class="px-5 py-3">Description</th>
+                        <th class="px-5 py-3 text-center">Risk</th>
+                        <th class="px-5 py-3">User</th>
+                        <th class="px-5 py-3">Session</th>
+                        <th class="px-5 py-3">Reviewed By</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for event in events %}
+                    <tr class="hover:bg-slate-800/20 transition-colors">
+                        <td class="px-5 py-3 font-mono text-slate-400 text-xs">EVT-{{ event.event_id }}</td>
+                        <td class="px-5 py-3 text-white font-medium text-sm">{{ event.event_type }}</td>
+                        <td class="px-5 py-3 text-slate-300 text-sm whitespace-normal min-w-[200px]">{{ event.description }}</td>
+                        <td class="px-5 py-3 text-center">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider
+                                {% if event.risk_level == 'High' %}bg-red-500/15 text-red-400 border border-red-500/20
+                                {% elif event.risk_level == 'Medium' %}bg-yellow-500/15 text-yellow-400 border border-yellow-500/20
+                                {% else %}bg-slate-500/15 text-slate-400 border border-slate-500/20{% endif %}">
+                                {{ event.risk_level }}
+                            </span>
+                        </td>
+                        <td class="px-5 py-3 text-white text-sm">{{ event.f_name }} {{ event.l_name }}</td>
+                        <td class="px-5 py-3 font-mono text-slate-400 text-xs">#{{ event.session_id }}</td>
+                        <td class="px-5 py-3 text-slate-300 text-sm">{{ event.admin_name }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="px-5 py-8 text-center text-slate-500">No events found for this filter.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Log New Event Form -->
+    <div class="glass rounded-xl p-6">
+        <h2 class="text-lg font-semibold text-white mb-4">Log New Security Event</h2>
+        <form action="{{ url_for('log_event') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Event Type</label>
+                <input type="text" name="event_type" required placeholder="e.g. Suspicious Login"
+                    class="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-sky-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Description</label>
+                <input type="text" name="description" placeholder="Details..."
+                    class="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-sky-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Risk Level</label>
+                <select name="risk_level" required
+                    class="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 rounded-xl text-white text-sm focus:outline-none focus:border-sky-500 appearance-none">
+                    <option value="Low" class="bg-slate-800">Low</option>
+                    <option value="Medium" class="bg-slate-800">Medium</option>
+                    <option value="High" class="bg-slate-800">High</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Session ID</label>
+                <select name="session_id" required
+                    class="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 rounded-xl text-white text-sm focus:outline-none focus:border-sky-500 appearance-none">
+                    {% for s in session_ids %}
+                    <option value="{{ s.session_id }}" class="bg-slate-800">Session #{{ s.session_id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Reviewed By (Admin)</label>
+                <select name="admin_id" required
+                    class="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 rounded-xl text-white text-sm focus:outline-none focus:border-sky-500 appearance-none">
+                    {% for a in admins %}
+                    <option value="{{ a.admin_id }}" class="bg-slate-800">{{ a.name }} ({{ a.role }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button type="submit"
+                    class="w-full py-2.5 px-4 bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-red-500/20 transition">
+                    Log Event
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
