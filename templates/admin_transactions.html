@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}All Transactions - SecureBank Admin{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-white">All Transactions</h1>
+        <p class="text-slate-400 text-sm mt-1">Every transaction across all accounts. Data from <code class="text-brand-400 bg-brand-500/10 px-1.5 py-0.5 rounded text-xs">transaction_view</code>.</p>
+    </div>
+
+    <!-- Aggregate Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="stat-card glass rounded-xl p-4">
+            <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Total Volume</div>
+            <div class="text-xl font-bold text-white mt-1">${{ "{:,.2f}".format(stats.total or 0) }}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">SUM(amount)</div>
+        </div>
+        <div class="stat-card glass rounded-xl p-4">
+            <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Average Amount</div>
+            <div class="text-xl font-bold text-white mt-1">${{ "{:,.2f}".format(stats.avg_amt or 0) }}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">AVG(amount)</div>
+        </div>
+        <div class="stat-card glass rounded-xl p-4">
+            <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Largest Transaction</div>
+            <div class="text-xl font-bold text-white mt-1">${{ "{:,.2f}".format(stats.max_amt or 0) }}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">MAX(amount)</div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="glass rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="text-[11px] uppercase text-slate-500 bg-slate-800/40 border-b border-white/5">
+                    <tr>
+                        <th class="px-5 py-3">Date & Time</th>
+                        <th class="px-5 py-3">User</th>
+                        <th class="px-5 py-3">Account</th>
+                        <th class="px-5 py-3">Type</th>
+                        <th class="px-5 py-3 text-right">Amount</th>
+                        <th class="px-5 py-3 text-right">Balance After</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for txn in transactions %}
+                    <tr class="hover:bg-slate-800/20 transition-colors">
+                        <td class="px-5 py-3 text-slate-300">{{ txn.transaction_time.strftime('%b %d, %Y  %H:%M') if txn.transaction_time else 'N/A' }}</td>
+                        <td class="px-5 py-3 text-white font-medium">{{ txn.f_name }} {{ txn.l_name }}</td>
+                        <td class="px-5 py-3 font-mono text-slate-400 text-xs">#{{ txn.account_id }}</td>
+                        <td class="px-5 py-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider
+                                {% if txn.account_type == 'Savings' %}bg-emerald-500/10 text-emerald-400
+                                {% else %}bg-purple-500/10 text-purple-400{% endif %}">
+                                {{ txn.account_type }}
+                            </span>
+                        </td>
+                        <td class="px-5 py-3 text-right font-semibold text-emerald-400">${{ "{:,.2f}".format(txn.amount) }}</td>
+                        <td class="px-5 py-3 text-right text-slate-300">${{ "{:,.2f}".format(txn.balance) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="px-5 py-8 text-center text-slate-500">No transactions found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
