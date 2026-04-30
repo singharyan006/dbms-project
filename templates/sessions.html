@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Session History - SecureBank{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-white">Session History</h1>
+        <p class="text-slate-400 text-sm mt-1">All your past login sessions.</p>
+    </div>
+
+    <div class="glass rounded-xl overflow-hidden">
+        <table class="w-full text-left text-sm">
+            <thead class="text-[11px] uppercase text-slate-500 bg-slate-800/40 border-b border-white/5">
+                <tr>
+                    <th class="px-5 py-3">Session ID</th>
+                    <th class="px-5 py-3">Login Time</th>
+                    <th class="px-5 py-3">Logout Time</th>
+                    <th class="px-5 py-3 text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for s in sessions_list %}
+                <tr class="hover:bg-slate-800/20 transition-colors">
+                    <td class="px-5 py-3 font-mono text-slate-400 text-xs">#{{ s.session_id }}</td>
+                    <td class="px-5 py-3 text-slate-300">{{ s.login_time.strftime('%b %d, %Y  %H:%M:%S') if s.login_time else 'N/A' }}</td>
+                    <td class="px-5 py-3 text-slate-300">{{ s.logout_time.strftime('%b %d, %Y  %H:%M:%S') if s.logout_time else '—' }}</td>
+                    <td class="px-5 py-3 text-center">
+                        {% if s.logout_time %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-slate-500/15 text-slate-400 border border-slate-500/20">Ended</span>
+                        {% else %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                                <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></span>Active
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="px-5 py-8 text-center text-slate-500 text-sm">No sessions found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
