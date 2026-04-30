@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Profile - SecureBank{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <h1 class="text-2xl font-bold text-white">My Profile</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Profile Card -->
+        <div class="glass rounded-xl p-6 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-400 to-purple-500"></div>
+
+            <div class="flex flex-col items-center text-center pt-2">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white text-2xl font-bold mb-4 shadow-lg shadow-brand-500/20">
+                    {{ user.f_name[0] }}{{ user.l_name[0] }}
+                </div>
+                <h2 class="text-xl font-bold text-white">{{ user.f_name }} {{ user.l_name }}</h2>
+                <span class="mt-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider
+                    {% if status == 'Active' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/20
+                    {% elif status == 'Blocked' %}bg-red-500/15 text-red-400 border border-red-500/20
+                    {% else %}bg-yellow-500/15 text-yellow-400 border border-yellow-500/20{% endif %}">
+                    {{ status }}
+                </span>
+            </div>
+
+            <div class="mt-6 space-y-3 border-t border-white/5 pt-5">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">User ID</span>
+                    <span class="text-white font-mono">#{{ user.user_id }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Email</span>
+                    <span class="text-white text-xs">{{ user.email }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Phone</span>
+                    <span class="text-white font-mono">{{ user.phone or 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Accounts</span>
+                    <span class="text-white font-semibold">{{ account_count }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounts Summary -->
+        <div class="lg:col-span-2 space-y-4">
+            <h2 class="text-lg font-semibold text-white">Account Summary</h2>
+            <p class="text-sm text-slate-400 -mt-2">Data from the <code class="text-brand-400 bg-brand-500/10 px-1.5 py-0.5 rounded text-xs">user_accounts</code> view</p>
+
+            <div class="glass rounded-xl overflow-hidden">
+                <table class="w-full text-left text-sm">
+                    <thead class="text-[11px] uppercase text-slate-500 bg-slate-800/40 border-b border-white/5">
+                        <tr>
+                            <th class="px-5 py-3">Name</th>
+                            <th class="px-5 py-3">Account ID</th>
+                            <th class="px-5 py-3 text-right">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for row in accounts_summary %}
+                        <tr class="hover:bg-slate-800/20 transition-colors">
+                            <td class="px-5 py-3 text-white font-medium">{{ row.f_name }}</td>
+                            <td class="px-5 py-3 font-mono text-slate-400">#{{ row.account_id }}</td>
+                            <td class="px-5 py-3 text-right font-semibold text-emerald-400">${{ "{:,.2f}".format(row.balance) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="px-5 py-8 text-center text-slate-500">No accounts.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="glass-light rounded-lg p-3 text-[11px] text-slate-500">
+                <strong class="text-slate-400">SQL Functions Used:</strong>
+                <code class="text-brand-400">user_status({{ user.user_id }})</code> → {{ status }} &nbsp;|&nbsp;
+                <code class="text-brand-400">total_accounts({{ user.user_id }})</code> → {{ account_count }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
